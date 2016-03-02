@@ -16,12 +16,16 @@ class Images:
         
     def createFeatures(self):
         self.imgFeatures = []
+        print(self.cnt)
         for n in range(0,self.cnt-1):
             feature = np.zeros((np.count_nonzero(self.img[n]),2))
             k = 0
-            for i in range(0,np.shape(self.img[n])[0]):
-                for j in range(0,np.shape(self.img[n])[1]):
-                        if img[n][i][j] <> 0:
+            timg = self.img[n]
+            print(n)
+            print(np.shape(timg))
+            for i in range(0,np.shape(timg)[0]):
+                for j in range(0,np.shape(timg)[1]):
+                        if timg[i][j] <> 0:
                             feature[k] = [i,j]
                             k = k + 1
         self.imgFeatures.append(feature)
@@ -29,9 +33,10 @@ class Images:
         for n in range(0,self.cnt-1):
             feature = np.zeros((np.count_nonzero(self.edges[n]),2))
             k = 0
-            for i in range(0,np.shape(self.edges[n])[0]):
-                for j in range(0,np.shape(self.edges[n])[1]):
-                        if img[n][i][j] <> 0:
+            tedge = self.edges[n]
+            for i in range(0,np.shape(tedge)[0]):
+                for j in range(0,np.shape(tedge)[1]):
+                        if tedge[i][j] <> 0:
                             feature[k] = [i,j]
                             k = k + 1
         self.edgesFeatures.append(feature)
@@ -49,8 +54,11 @@ class Images:
     def getEdgeImage(self,i):
         return edges[i]
     
-    def getFeature(self,i):
-        return features[i]
+    def getImgFeature(self,i):
+        return imgFeatures[i]
+        
+    def getEdgesFeature(self,i):
+        return edgesFeatures[i]
       
     
     def getCount(self):

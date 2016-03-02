@@ -2,7 +2,7 @@ import cv2
 import sklearn
 import numpy as np
 import os
-import Images
+from Images import Images
 from matplotlib import pyplot as plt
 from sklearn.cluster import DBSCAN
 from sklearn import metrics
@@ -15,7 +15,7 @@ img.applyCanny()
 img.createFeatures()
 
 # Compute DBSCAN
-db = DBSCAN(eps=15, min_samples=10).fit(features[0])
+db = DBSCAN(eps=15, min_samples=10).fit(img.getEdgesFeature(0))
 core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
 core_samples_mask[db.core_sample_indices_] = True
 labels = db.labels_
