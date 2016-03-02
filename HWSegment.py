@@ -15,7 +15,7 @@ img.applyCanny()
 img.createFeatures()
 
 # Compute DBSCAN
-db = DBSCAN(eps=15, min_samples=10).fit(img.getEdgesFeature(0))
+db1 = DBSCAN(eps=15, min_samples=10).fit(img.getEdgesFeature(0))
 core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
 core_samples_mask[db.core_sample_indices_] = True
 labels = db.labels_

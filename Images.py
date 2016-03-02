@@ -49,18 +49,18 @@ class Images:
     
     
     def getImage(self,i):
-        return img[i]
+        return self.img[i]
        
     def getEdgeImage(self,i):
-        return edges[i]
+        return self.edges[i]
     
     def getImgFeature(self,i):
-        return imgFeatures[i]
+        return self.imgFeatures[i]
         
     def getEdgesFeature(self,i):
-        return edgesFeatures[i]
+        return self.edgesFeatures[i]
       
     
     def getCount(self):
-        return cnt
+        return self.cnt
         
