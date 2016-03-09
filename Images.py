@@ -18,7 +18,7 @@ class Images:
         self.imgFeatures = []
         print(self.cnt)
         for n in range(0,self.cnt-1):
-            feature = np.zeros((np.count_nonzero(self.img[n]),2))
+            feature = np.zeros((np.count_nonzero(self.img[n]),3))
             k = 0
             timg = self.img[n]
             print(n)
@@ -26,18 +26,18 @@ class Images:
             for i in range(0,np.shape(timg)[0]):
                 for j in range(0,np.shape(timg)[1]):
                         if timg[i][j] <> 0:
-                            feature[k] = [i,j]
+                            feature[k] = [i,j,-1]
                             k = k + 1
         self.imgFeatures.append(feature)
         self.edgesFeatures = []
         for n in range(0,self.cnt-1):
-            feature = np.zeros((np.count_nonzero(self.edges[n]),2))
+            feature = np.zeros((np.count_nonzero(self.edges[n]),3))
             k = 0
             tedge = self.edges[n]
             for i in range(0,np.shape(tedge)[0]):
                 for j in range(0,np.shape(tedge)[1]):
                         if tedge[i][j] <> 0:
-                            feature[k] = [i,j]
+                            feature[k] = [i,j,-1]
                             k = k + 1
         self.edgesFeatures.append(feature)
         
