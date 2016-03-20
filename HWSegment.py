@@ -15,14 +15,14 @@ img.applyCanny()
 img.createFeatures()
 
 # Compute DBSCAN
-db1 = DBSCAN(eps=10, min_samples=10).fit(img.getEdgesFeature(0))
+db1 = DBSCAN(eps=5, min_samples=12).fit(img.getEdgesFeature(0))
 core_samples_mask = np.zeros_like(db1.labels_, dtype=bool)
 core_samples_mask[db1.core_sample_indices_] = True
 labels = db1.labels_
 print(labels)
 n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
 
-#Calculating Maximum and Minimum of each cluster and storing 1 for max and -1 for min value in corresponding index position of maxminarray
+#Calculating Maximum and Minimum of each cluster and storing 1 for max and -1 for min value in corresponding index position of maxminarray .. . Hell sloww!!!!
 
 maxminarray = np.zeros((len(labels),1))
 
@@ -42,7 +42,7 @@ for i in range(1,n_clusters_):
 #Classifying the maxima and minima in 4 classes .. Hell sloww!!!!
 
 for i in range(2,n_clusters_-2):
-      print(i)
+     
       maxvalcur = findMaxInCluster(i,img.getEdgesFeature(0),maxminarray,labels)
       minvalcur = findMinInCluster(i,img.getEdgesFeature(0),maxminarray,labels)
       
@@ -56,15 +56,16 @@ for i in range(2,n_clusters_-2):
       diffmaxprv = abs(maxvalprev - maxvalcur)
       diffminnxt = abs(minvalnext - minvalcur)
       diffminprv = abs(minvalprev - minvalcur)
-      
+      print(diffmaxnxt)
+      print(diffmaxprv)
       diffcurr = abs(maxvalcur - minvalcur)
       p1 = p2 = p3 = 0
-      if diffcurr > 6 and diffcurr <= 10:
+      if diffcurr > 3 and diffcurr <= 10:
           p1 = 1 #lower and upper baseline
       else:
-          if (diffmaxnxt > 4 and diffmaxnxt <=10) or (diffmaxprv > 4 and diffmaxprv <=10):
+          if (diffmaxnxt > 2 and diffmaxnxt <=6) or (diffmaxprv > 2 and diffmaxprv <=6):
               p2 = 1 
-          if (diffminnxt > 4 and diffminnxt <=10) or (diffminprv > 4 and diffminprv <=10):
+          if (diffminnxt > 2 and diffminnxt <=6) or (diffminprv > 2 and diffminprv <=6):
               p3 = 1
        
       b = [item for item in range(len(labels)) if labels[item] == i]
@@ -88,8 +89,13 @@ for i in range(2,n_clusters_-2):
           img.getEdgesFeature(0)[maxindex][:,2]=3
           img.getEdgesFeature(0)[minindex][:,2]=3
 
+
+
 t = invertImage(img.getEdgeImage(0))
 cv2.imwrite( "edge.jpg", t )
+t = markImage(t,img.getEdgesFeature(0))
+backtorgb = cv2.cvtColor(t,cv2.COLOR_GRAY2RGB )
+cv2.imwrite( "edgemarked.jpg",backtorgb )
 # print('Estimated number of clusters: %d' % n_clusters_)
 # print("Homogeneity: %0.3f" % metrics.homogeneity_score(labels_true, labels))
 # print("Completeness: %0.3f" % metrics.completeness_score(labels_true, labels))
@@ -135,9 +141,19 @@ def invertImage(img):
                 
     return img
             
-
-
-    
+def markImage(img, featureImg):
+    a = np.shape(featureImg)
+    for i in range(a[0]):
+        if featureImg[i][2] == -1:
+            img[featureImg[i][0]][featureImg[i][1]] = 50
+            #print(i)
+        if featureImg[i][2] == 1:
+            img[featureImg[i][0]][featureImg[i][1]] = 100    
+        if featureImg[i][2] == 2:
+            img[featureImg[i][0]][featureImg[i][1]] = 150
+        if featureImg[i][2] == 3:
+            img[featureImg[i][0]][featureImg[i][1]] = 200
+    return img    
 
 
 
