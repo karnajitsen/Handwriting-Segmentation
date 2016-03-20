@@ -37,10 +37,12 @@ for i in range(1,n_clusters_):
           if temp[j] == minvalue:
               maxminarray[b[j]] = -1
 
-#Classifying the maxima and minima in 4 classes
 
-for i in range(2,n_clusters_):
-      
+
+#Classifying the maxima and minima in 4 classes .. Hell sloww!!!!
+
+for i in range(2,n_clusters_-2):
+      print(i)
       maxvalcur = findMaxInCluster(i,img.getEdgesFeature(0),maxminarray,labels)
       minvalcur = findMinInCluster(i,img.getEdgesFeature(0),maxminarray,labels)
       
@@ -71,21 +73,23 @@ for i in range(2,n_clusters_):
       minindex = [b[j] for j in range(len(b)) if img.getEdgesFeature(0)[b[j]][1] == minvalcur]
            
       if p1==1:
-          img.getEdgesFeature(0)[maxindex][2]=0
-          img.getEdgesFeature(0)[minindex][2]=1
+          img.getEdgesFeature(0)[maxindex][:,2]=0
+          img.getEdgesFeature(0)[minindex][:,2]=1
       elif p2==1 and p3 ==1:
-          img.getEdgesFeature(0)[maxindex][2]=2
-          img.getEdgesFeature(0)[minindex][2]=2
+          img.getEdgesFeature(0)[maxindex][:,2]=2
+          img.getEdgesFeature(0)[minindex][:,2]=2
       elif p2==1 and p3==0:
-          img.getEdgesFeature(0)[maxindex][2]=2
-          img.getEdgesFeature(0)[minindex][2]=1
+          img.getEdgesFeature(0)[maxindex][:,2]=2
+          img.getEdgesFeature(0)[minindex][:,2]=1
       elif p3==1 and p2==0:
-          img.getEdgesFeature(0)[maxindex][2]=0
-          img.getEdgesFeature(0)[minindex][2]=2
+          img.getEdgesFeature(0)[maxindex][:,2]=0
+          img.getEdgesFeature(0)[minindex][:,2]=2
       else: 
-          img.getEdgesFeature(0)[maxindex][2]=3
-          img.getEdgesFeature(0)[minindex][2]=3
-      
+          img.getEdgesFeature(0)[maxindex][:,2]=3
+          img.getEdgesFeature(0)[minindex][:,2]=3
+
+t = invertImage(img.getEdgeImage(0))
+cv2.imwrite( "edge.jpg", t )
 # print('Estimated number of clusters: %d' % n_clusters_)
 # print("Homogeneity: %0.3f" % metrics.homogeneity_score(labels_true, labels))
 # print("Completeness: %0.3f" % metrics.completeness_score(labels_true, labels))
@@ -102,6 +106,7 @@ for i in range(2,n_clusters_):
 
 def findMaxInCluster(i,image,maxminarray,labels):
       b = [item for item in range(len(labels)) if labels[item] == i]
+      maxval = 0
       for j in range(0,len(b)):
           if maxminarray[b[j]] == 1:
              maxval = image[b[j]][1]
@@ -111,12 +116,26 @@ def findMaxInCluster(i,image,maxminarray,labels):
     
 def findMinInCluster(i,image,maxminarray,labels):
       b = [item for item in range(len(labels)) if labels[item] == i]
+      minval = 0
       for j in range(0,len(b)):
           if maxminarray[b[j]] == -1:
              minval = image[b[j]][1]
              break
         
       return minval
+      
+def invertImage(img):
+    dim = np.shape(img)
+    for i in range(dim[0]):
+        for j in range(dim[1]):
+            if img[i][j]==0:
+                img[i][j] = 255
+            else:
+                img[i][j] = 0
+                
+    return img
+            
+
 
     
 
