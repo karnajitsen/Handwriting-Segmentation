@@ -26,7 +26,7 @@ class Images:
             for i in range(0,np.shape(timg)[0]):
                 for j in range(0,np.shape(timg)[1]):
                         if timg[i][j] <> 0:
-                            feature[k] = [i,j,-1]
+                            feature[k] = [j,i,-1]
                             k = k + 1
             self.imgFeatures.append(feature)
         self.edgesFeatures = []
@@ -37,7 +37,7 @@ class Images:
             for i in range(0,np.shape(tedge)[0]):
                 for j in range(0,np.shape(tedge)[1]):
                         if tedge[i][j] <> 0:
-                            feature[k] = [i,j,-1]
+                            feature[k] = [j,i,-1]
                             k = k + 1
             self.edgesFeatures.append(feature)
         
