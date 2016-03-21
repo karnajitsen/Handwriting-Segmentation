@@ -144,7 +144,7 @@ def invertImage(img):
 def markImage(img, featureImg):
     a = np.shape(featureImg)
     for i in range(a[0]):
-        if featureImg[i][2] == -1:
+        if featureImg[i][2] == 0:
             img[featureImg[i][0]][featureImg[i][1]] = 50
             #print(i)
         if featureImg[i][2] == 1:
