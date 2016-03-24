@@ -37,8 +37,8 @@ for i in range(1,n_clusters_):
           
 
 fimgi[:,3] = maxminarray[:,0]
-      
-markAndSave(img1,maxminarray)
+imgi = img.getImage(0)    
+markAndSave(imgi,fimgi)
 
 #Classifying the maxima and minima in 4 classes Preparing label data for training.
 
@@ -160,7 +160,16 @@ def markImage(img, featureImg):
             img[featureImg[i][0]][featureImg[i][1]] = 200
     return img    
 
-def markAndSave(points,img):
-    img
+def markAndSave(img, fimg):
+    cimg = cv2.cvtColor(img,cv2.COLOR_GRAY2RGB)
+    r = np.where(fimg[:,3] == 1)
+    s = r[0][:]
+    cimg[fimg[s,1]:fimg[s,1]+10,fimg[s,0]:fimg[s,0]+10,:] = [255,1,0]
+    r = np.where(fimg[:,3] == 2)
+    s = r[0][:]
+    cimg[fimg[s,1]:fimg[s,1]+10,fimg[s,0]:fimg[s,0]+10,:] = [0,1,255]
+    cv2.imwrite('colormarkedmaxmin.jpg',cimg)
+    
+    
 
-
+    
