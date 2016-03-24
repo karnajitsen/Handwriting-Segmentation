@@ -23,9 +23,9 @@ labels = db1.labels_
 #print(labels)
 n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
 
-#Calculating Maximum and Minimum of each cluster and storing 1 for max and -1 for min value in corresponding index position of maxminarray ..
+#Calculating Maximum and Minimum of each cluster and storing 1 for max and -1 for min value in corresponding index position of maxminarray ...
 
-maxminarray = np.zeros((len(labels),1))
+maxminarray = np.zeros((len(labels),1)) 
 
 for i in range(1,n_clusters_):
       b = np.where(labels==i)
