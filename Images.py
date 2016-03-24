@@ -31,13 +31,14 @@ class Images:
         #                     feature[k] = [j,i,-1]
         #                     k = k + 1
         #     self.imgFeatures.append(feature)
-        self.edgesFeatures = []
+        self.edgesFeatures = [[]]
         for n in range(0,self.cnt-1):
             feature = np.zeros((np.count_nonzero(self.edges[n]),4))
             c = np.nonzero(self.edges[n])
             feature[:,0] = c[1]
             feature[:,1] = c[0]
-            self.edgesFeatures.append(feature)
+            self.edgesFeatures.append( feature)
+        print(np.shape(self.edgesFeatures))
         
      
     def applyCanny(self):

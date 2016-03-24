@@ -11,12 +11,13 @@ from sklearn import metrics
 path1 = '/home/karna/Karna_Work/Handwriting_Project/Handwriting-Segmentation/data/'
 
 img = Images(path1)
-img.cnt
+print(img.cnt)
 img.applyCanny()
 img.createFeatures()
-fimgi = img.getEdgesFeature(0)
+fimgi = img.getEdgesFeature(1)
+imgi = img.getImage(1)
 # Compute DBSCAN .. little slow!!
-db1 = DBSCAN(eps=10, min_samples=12).fit(fimgi)
+db1 = DBSCAN(eps=5, min_samples=12).fit(fimgi)
 #core_samples_mask = np.zeros_like(db1.labels_, dtype=bool)
 #core_samples_mask[db1.core_sample_indices_] = True
 labels = db1.labels_
@@ -37,9 +38,9 @@ for i in range(1,n_clusters_):
           
 
 fimgi[:,3] = maxminarray[:,0]
-imgi = img.getImage(0)    
+    
 markAndSave(imgi,fimgi)
-
+visualizeCluster(imgi,fimgi,labels,n_clusters_)
 #Classifying the maxima and minima in 4 classes Preparing label data for training.
 
 for i in range(2,n_clusters_-2):
@@ -164,12 +165,36 @@ def markAndSave(img, fimg):
     cimg = cv2.cvtColor(img,cv2.COLOR_GRAY2RGB)
     r = np.where(fimg[:,3] == 1)
     s = r[0][:]
-    cimg[fimg[s,1]:fimg[s,1]+10,fimg[s,0]:fimg[s,0]+10,:] = [255,1,0]
+    t = fimg[s,1].astype(int)
+    u = fimg[s,0].astype(int)
+    for i in range(len(s)):
+        cimg[t[i]:t[i]+20,u[i]:u[i]+20,:] = [255,1,0]
+        
     r = np.where(fimg[:,3] == 2)
     s = r[0][:]
-    cimg[fimg[s,1]:fimg[s,1]+10,fimg[s,0]:fimg[s,0]+10,:] = [0,1,255]
+    t = fimg[s,1].astype(int)
+    u = fimg[s,0].astype(int)
+    for i in range(len(s)):
+        cimg[t[i]:t[i]+20,u[i]:u[i]+20,:] = [0,1,255]
     cv2.imwrite('colormarkedmaxmin.jpg',cimg)
     
+  
+def visualizeCluster(imgi,fimgi,labels,n_clusters_):
+    R = 255
+    G = 1
+    B = 0
+    cimg = cv2.cvtColor(imgi,cv2.COLOR_GRAY2RGB)
+    for i in range(1,n_clusters_):
+        b = np.where(labels==i)
+        cimg[fimgi[b,1].astype(int),fimgi[b,0].astype(int),:] = [R,G,B]
+        if R == min(R,G,B):
+            R = R+10
+        if G == min(R,G,B):
+            G = G + 10
+        if B == min(R,G,B):
+            B = B + 10
+    cv2.imwrite('colormarkedclusters.jpg',cimg)
+        
     
 
     
