@@ -95,7 +95,7 @@ for i in range(2,n_clusters_-2):
           img.getEdgesFeature(0)[maxindex][:,2]=0
           img.getEdgesFeature(0)[minindex][:,2]=2
       else: 
-          img.getEdgesFeature(0)[maxindex][:,2]=3CV
+          img.getEdgesFeature(0)[maxindex][:,2]=3
           img.getEdgesFeature(0)[minindex][:,2]=3
 
       print(diffcurr,diffmaxnxt, diffmaxprv , diffminnxt, diffminprv, p1,p2,p3)
