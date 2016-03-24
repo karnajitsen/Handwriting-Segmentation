@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import cv2
+import cv
 
 class Images:
     def __init__(self,path):
@@ -12,33 +13,30 @@ class Images:
             self.cnt = self.cnt + 1
             fl = cv2.imread(path + file,0)
             self.img.append(fl)
+           
 
         
     def createFeatures(self):
-        self.imgFeatures = []
-        print(self.cnt)
-        for n in range(0,self.cnt-1):
-            feature = np.zeros((np.count_nonzero(self.img[n]),3))
-            k = 0
-            timg = self.img[n]
-            print(n)
-            print(np.shape(timg))
-            for i in range(0,np.shape(timg)[0]):
-                for j in range(0,np.shape(timg)[1]):
-                        if timg[i][j] <> 0:
-                            feature[k] = [j,i,-1]
-                            k = k + 1
-            self.imgFeatures.append(feature)
+        # self.imgFeatures = []
+        # print(self.cnt)
+        # for n in range(0,self.cnt-1):
+        #     feature = np.zeros((np.count_nonzero(self.img[n]),3))
+        #     k = 0
+        #     timg = self.img[n]
+        #     print(n)
+        #     print(np.shape(timg))
+        #     for i in range(0,np.shape(timg)[0]):
+        #         for j in range(0,np.shape(timg)[1]):
+        #                 if timg[i][j] <> 0:
+        #                     feature[k] = [j,i,-1]
+        #                     k = k + 1
+        #     self.imgFeatures.append(feature)
         self.edgesFeatures = []
         for n in range(0,self.cnt-1):
-            feature = np.zeros((np.count_nonzero(self.edges[n]),3))
-            k = 0
-            tedge = self.edges[n]
-            for i in range(0,np.shape(tedge)[0]):
-                for j in range(0,np.shape(tedge)[1]):
-                        if tedge[i][j] <> 0:
-                            feature[k] = [j,i,-1]
-                            k = k + 1
+            feature = np.zeros((np.count_nonzero(self.edges[n]),4))
+            c = np.nonzero(self.edges[n])
+            feature[:,0] = c[1]
+            feature[:,1] = c[0]
             self.edgesFeatures.append(feature)
         
      

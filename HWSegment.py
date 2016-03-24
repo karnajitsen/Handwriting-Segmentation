@@ -1,4 +1,5 @@
 import cv2
+import cv
 import sklearn
 import numpy as np
 import os
@@ -13,60 +14,68 @@ img = Images(path1)
 img.cnt
 img.applyCanny()
 img.createFeatures()
-
-# Compute DBSCAN
-db1 = DBSCAN(eps=5, min_samples=12).fit(img.getEdgesFeature(0))
-core_samples_mask = np.zeros_like(db1.labels_, dtype=bool)
-core_samples_mask[db1.core_sample_indices_] = True
+fimgi = img.getEdgesFeature(0)
+# Compute DBSCAN .. little slow!!
+db1 = DBSCAN(eps=10, min_samples=12).fit(fimgi)
+#core_samples_mask = np.zeros_like(db1.labels_, dtype=bool)
+#core_samples_mask[db1.core_sample_indices_] = True
 labels = db1.labels_
-print(labels)
+#print(labels)
 n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
 
-#Calculating Maximum and Minimum of each cluster and storing 1 for max and -1 for min value in corresponding index position of maxminarray .. . Hell sloww!!!!
+#Calculating Maximum and Minimum of each cluster and storing 1 for max and -1 for min value in corresponding index position of maxminarray ..
 
 maxminarray = np.zeros((len(labels),1))
 
 for i in range(1,n_clusters_):
-      b = [item for item in range(len(labels)) if labels[item] == i]
-      temp = img.getEdgesFeature(0)[b][:,1]
-      maxvalue = max(temp)
-      minvalue = min(temp)
-      for j in range(0,len(b)):
-          if temp[j] == maxvalue:
-              maxminarray[b[j]] = 1
-          if temp[j] == minvalue:
-              maxminarray[b[j]] = -1
+      b = np.where(labels==i)
+      #temp = fimgi[b][:,1]
+      maxvalue = max(fimgi[b][:,1])
+      minvalue = min(fimgi[b][:,1])
+      maxminarray[np.where(fimgi[b][:,1] == maxvalue)] = 1
+      maxminarray[np.where(fimgi[b][:,1] == minvalue)] = 2
+          
 
+fimgi[:,3] = maxminarray[:,0]
+      
+markAndSave(img1,maxminarray)
 
-
-#Classifying the maxima and minima in 4 classes .. Hell sloww!!!!
+#Classifying the maxima and minima in 4 classes Preparing label data for training.
 
 for i in range(2,n_clusters_-2):
-     
-      maxvalcur = findMaxInCluster(i,img.getEdgesFeature(0),maxminarray,labels)
-      minvalcur = findMinInCluster(i,img.getEdgesFeature(0),maxminarray,labels)
+      timg = 
+      maxvalcur = findMaxInCluster(i,fimgi,maxminarray,labels)
+      minvalcur = findMinInCluster(i,fimgi,maxminarray,labels)
       
-      maxvalnext = findMaxInCluster(i+1,img.getEdgesFeature(0),maxminarray,labels)
-      minvalnext = findMinInCluster(i+1,img.getEdgesFeature(0),maxminarray,labels)
+      maxvalnext = findMaxInCluster(i+1,fimgi,maxminarray,labels)
+      minvalnext = findMinInCluster(i+1,fimgi,maxminarray,labels)
       
-      maxvalprev = findMaxInCluster(i-1,img.getEdgesFeature(0),maxminarray,labels)
-      minvalprev = findMinInCluster(i-1,img.getEdgesFeature(0),maxminarray,labels)
+      maxvalprev = findMaxInCluster(i-1,fimgi,maxminarray,labels)
+      minvalprev = findMinInCluster(i-1,fimgi,maxminarray,labels)
       
-      diffmaxnxt = abs(maxvalnext - maxvalcur)
-      diffmaxprv = abs(maxvalprev - maxvalcur)
-      diffminnxt = abs(minvalnext - minvalcur)
-      diffminprv = abs(minvalprev - minvalcur)
-      print(diffmaxnxt)
-      print(diffmaxprv)
+       diffmaxnxt = maxvalnext - maxvalcur
+       diffmaxprv = maxvalprev - maxvalcur
+       diffminnxt = minvalnext - minvalcur
+       diffminprv = minvalprev - minvalcur
+      # #print(diffmaxnxt)
+      # #print(diffmaxprv)
       diffcurr = abs(maxvalcur - minvalcur)
       p1 = p2 = p3 = 0
-      if diffcurr > 3 and diffcurr <= 10:
+      if diffcurr >= 30 and diffcurr <= 90:
           p1 = 1 #lower and upper baseline
+      if diffcurr < 5:
+          p2 = 1 # both are middle line
       else:
-          if (diffmaxnxt > 2 and diffmaxnxt <=6) or (diffmaxprv > 2 and diffmaxprv <=6):
+          if (diffmaxnxt < -10 and diffmaxnxt > -55) or (diffmaxprv < -10 and diffmaxprv > -55):
               p2 = 1 
-          if (diffminnxt > 2 and diffminnxt <=6) or (diffminprv > 2 and diffminprv <=6):
+          if (diffminnxt > 10 and diffminnxt <=55) or (diffminprv > 10 and diffminprv <=55):
+              p3 = 1 
+          if p2 == 0 and p3 ==0:
+              
+          if diffcurr < 30 and diffmaxnxt < 10 and diffmaxprv < 10 and diffminnxt < 10 and diffminprv < 10:
+              p2 = 1
               p3 = 1
+         
        
       b = [item for item in range(len(labels)) if labels[item] == i]
                
@@ -86,16 +95,16 @@ for i in range(2,n_clusters_-2):
           img.getEdgesFeature(0)[maxindex][:,2]=0
           img.getEdgesFeature(0)[minindex][:,2]=2
       else: 
-          img.getEdgesFeature(0)[maxindex][:,2]=3
+          img.getEdgesFeature(0)[maxindex][:,2]=3CV
           img.getEdgesFeature(0)[minindex][:,2]=3
 
+      print(diffcurr,diffmaxnxt, diffmaxprv , diffminnxt, diffminprv, p1,p2,p3)
 
-
-t = invertImage(img.getEdgeImage(0))
+t = invertImage(img.getImage(0))
 cv2.imwrite( "edge.jpg", t )
-t = markImage(t,img.getEdgesFeature(0))
+t = markImage(img.getImage(0),img.getEdgesFeature(0))
 backtorgb = cv2.cvtColor(t,cv2.COLOR_GRAY2RGB )
-cv2.imwrite( "edgemarked.jpg",backtorgb )
+cv2.imwrite( "edgemarked.jpg",img.getImage(0) )
 # print('Estimated number of clusters: %d' % n_clusters_)
 # print("Homogeneity: %0.3f" % metrics.homogeneity_score(labels_true, labels))
 # print("Completeness: %0.3f" % metrics.completeness_score(labels_true, labels))
@@ -111,24 +120,20 @@ cv2.imwrite( "edgemarked.jpg",backtorgb )
 #n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
 
 def findMaxInCluster(i,image,maxminarray,labels):
-      b = [item for item in range(len(labels)) if labels[item] == i]
-      maxval = 0
-      for j in range(0,len(b)):
-          if maxminarray[b[j]] == 1:
-             maxval = image[b[j]][1]
-             break
-        
-      return maxval
+      b = np.where(labels==i)
+      maxval = image[np.where(maxminarray[b] == 1)][1]
+      if np.shape(maxval) > 0:
+          return maxval[0]
+      else:
+          return -1
     
 def findMinInCluster(i,image,maxminarray,labels):
-      b = [item for item in range(len(labels)) if labels[item] == i]
-      minval = 0
-      for j in range(0,len(b)):
-          if maxminarray[b[j]] == -1:
-             minval = image[b[j]][1]
-             break
-        
-      return minval
+      b = np.where(labels==i)
+      minval = image[np.where(maxminarray[b] == 2)][1]
+      if np.shape(minval) > 0:
+          return minval[0]
+      else:
+          return -1
       
 def invertImage(img):
     dim = np.shape(img)
@@ -155,6 +160,7 @@ def markImage(img, featureImg):
             img[featureImg[i][0]][featureImg[i][1]] = 200
     return img    
 
-
+def markAndSave(points,img):
+    img
 
 
