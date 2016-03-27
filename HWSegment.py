@@ -16,8 +16,53 @@ img.applyCanny()
 img.createFeatures()
 fimgi = img.getEdgesFeature(1)
 imgi = img.getImage(1)
+
+
+sh = np.shape(imgi)
+nimg = imgi[0:sh[0]/6,:]
+imgi = nimg
+#Thresholding and Binarization
+imgb = np.zeros((np.shape(imgi)))
+imgb[imgi > 100] = 255
+imgb[imgi <= 100] = 0
+cv2.imwrite('thresholdimage.jpg',imgb)
+imgcan = cv2.Canny(imgi,100,200)
+imgcan[imgb==255]=255
+fimgb = createFeatures(imgcan)
+
+
+f = np.fft.fft2(imgi)
+fshift = np.fft.fftshift(f)
+magnitude_spectrum = 20*np.log(np.abs(fshift))
+plt.subplot(121),plt.imshow(imgi, cmap = 'gray')
+plt.title('Input Image'), plt.xticks([]), plt.yticks([])
+plt.subplot(122),plt.imshow(magnitude_spectrum, cmap = 'gray')
+plt.title('Magnitude Spectrum'), plt.xticks([]), plt.yticks([])
+plt.show()
+p=500
+
+sh = np.shape(fshift)
+fshift[0:sh[0]/4+p,:] = 0
+fshift[:,0:sh[1]/4+p] = 0
+fshift[3*sh[0]/4-p:sh[0]-1,:] = 0
+fshift[:,3*sh[1]/4-p:sh[1]-1] = 0
+
+f_ishift = np.fft.ifftshift(fshift)
+img_back = np.fft.ifft2(f_ishift)
+img_back = np.abs(img_back)
+
+plt.subplot(131),plt.imshow(imgi, cmap = 'gray')
+plt.title('Input Image'), plt.xticks([]), plt.yticks([])
+plt.subplot(132),plt.imshow(img_back, cmap = 'gray')
+plt.title('Image after LPF'), plt.xticks([]), plt.yticks([])
+plt.subplot(133),plt.imshow(img_back)
+plt.title('Result in JET'), plt.xticks([]), plt.yticks([])
+plt.imshow(img_back, cmap = 'gray')
+plt.show()
+
+fimgi = fimgb
 # Compute DBSCAN .. little slow!!
-db1 = DBSCAN(eps=5, min_samples=12).fit(fimgi)
+db1 = DBSCAN(eps=10, min_samples=10).fit(fimgi)
 #core_samples_mask = np.zeros_like(db1.labels_, dtype=bool)
 #core_samples_mask[db1.core_sample_indices_] = True
 labels = db1.labels_
@@ -186,15 +231,29 @@ def visualizeCluster(imgi,fimgi,labels,n_clusters_):
     cimg = cv2.cvtColor(imgi,cv2.COLOR_GRAY2RGB)
     for i in range(1,n_clusters_):
         b = np.where(labels==i)
-        cimg[fimgi[b,1].astype(int),fimgi[b,0].astype(int),:] = [R,G,B]
-        if R == min(R,G,B):
-            R = R+10
-        if G == min(R,G,B):
-            G = G + 10
-        if B == min(R,G,B):
-            B = B + 10
-    cv2.imwrite('colormarkedclusters.jpg',cimg)
+        cimg[fimgi[b,1].astype(int),fimgi[b,0].astype(int),:] = random_color()
         
+        # if R == min(R,G,B):
+        #     R = R+10
+        # if G == min(R,G,B):
+        #     G = G + 10
+        # if B == min(R,G,B):
+        #     B = B + 10
+    cv2.imwrite('colormarkedcluster.jpg',cimg)
+   # with open('test.txt','wb') as f:
+   #     np.savetxt(f,cimg.astype(int), delimiter=" ", fmt = '%d')
+ 
+def random_color():
+    rgbl=[255,0,0]
+    np.random.shuffle(rgbl)
+    return tuple(rgbl)
     
+def createFeatures(img):
+    #edgesFeatures = [[]]
+    feature = np.zeros((np.count_nonzero(img),2))
+    c = np.nonzero(img)
+    feature[:,0] = c[1]
+    feature[:,1] = c[0]
+    return feature
 
     
