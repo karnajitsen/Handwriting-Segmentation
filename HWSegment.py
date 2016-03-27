@@ -15,32 +15,70 @@ print(img.cnt)
 img.applyCanny()
 img.createFeatures()
 fimgi = img.getEdgesFeature(1)
-imgi = img.getImage(1)
+imgi = img.getImage(0)
 
-
+#dividing the image into two pages and removing the marginal white part from 4 sides.
 sh = np.shape(imgi)
-nimg = imgi[0:sh[0]/6,:]
-imgi = nimg
-#Thresholding and Binarization
-imgb = np.zeros((np.shape(imgi)))
-imgb[imgi > 100] = 255
-imgb[imgi <= 100] = 0
-cv2.imwrite('thresholdimage.jpg',imgb)
-imgcan = cv2.Canny(imgi,100,200)
-imgcan[imgb==255]=255
-fimgb = createFeatures(imgcan)
+limgi = imgi[:,0:sh[1]/2-1]
+rimgi = imgi[:,sh[1]/2:sh[1]-1]
+plt.imshow(rimgi,cmap='gray')
+plt.show()
+sh=np.shape(limgi)
+up = 120
+down=150
+left = 400
+right = 90
+lpimgi = limgi[up:sh[0]-down,left:sh[1]-right]
+plt.imshow(lpimgi,cmap='gray')
+plt.show()
 
+sh=np.shape(rimgi)
+up = 120
+down=150
+left = 300
+right = 250
+rpimgi = rimgi[up:sh[0]-down,left:sh[1]-right]
+plt.imshow(rpimgi,cmap='gray')
+plt.show()
 
-f = np.fft.fft2(imgi)
+# blpimgi=binarize(lpimgi)
+# plt.imshow(blpimgi,cmap='gray')
+# plt.show()
+# brpimgi=binarize(rpimgi)
+# plt.imshow(brpimgi,cmap='gray')
+# plt.show()
+# cv2.cvtColor(brpimgi,cv2.COLOR_B)
+
+precan=rpimgi
+# precan[brpimgi==255]=255
+# plt.imshow(precan,cmap='gray')
+# plt.show()
+  
+# Canny
+imgcan = cv2.Canny(precan,100,200)
+imgcan[imgcan==255]=5
+imgcan[imgcan==0]=255
+imgcan[imgcan==5]=0
+plt.imshow(imgcan,cmap='gray')
+plt.show()
+sh=np.shape(imgcan)
+imgcutcan=imgcan[0:200,0:sh[1]-200]
+plt.imshow(imgcutcan,cmap='gray')
+plt.show()
+fimgb = createFeatures(imgcutcan)
+
+#fourier transform to remove noise
+
+f = np.fft.fft2(imgcan)
 fshift = np.fft.fftshift(f)
 magnitude_spectrum = 20*np.log(np.abs(fshift))
-plt.subplot(121),plt.imshow(imgi, cmap = 'gray')
+plt.subplot(121),plt.imshow(imgcan, cmap = 'gray')
 plt.title('Input Image'), plt.xticks([]), plt.yticks([])
 plt.subplot(122),plt.imshow(magnitude_spectrum, cmap = 'gray')
 plt.title('Magnitude Spectrum'), plt.xticks([]), plt.yticks([])
 plt.show()
-p=500
 
+p=300
 sh = np.shape(fshift)
 fshift[0:sh[0]/4+p,:] = 0
 fshift[:,0:sh[1]/4+p] = 0
@@ -51,7 +89,7 @@ f_ishift = np.fft.ifftshift(fshift)
 img_back = np.fft.ifft2(f_ishift)
 img_back = np.abs(img_back)
 
-plt.subplot(131),plt.imshow(imgi, cmap = 'gray')
+plt.subplot(131),plt.imshow(imgcan, cmap = 'gray')
 plt.title('Input Image'), plt.xticks([]), plt.yticks([])
 plt.subplot(132),plt.imshow(img_back, cmap = 'gray')
 plt.title('Image after LPF'), plt.xticks([]), plt.yticks([])
@@ -62,7 +100,7 @@ plt.show()
 
 fimgi = fimgb
 # Compute DBSCAN .. little slow!!
-db1 = DBSCAN(eps=10, min_samples=10).fit(fimgi)
+db1 = DBSCAN(eps=2, min_samples=5).fit(fimgb)
 #core_samples_mask = np.zeros_like(db1.labels_, dtype=bool)
 #core_samples_mask[db1.core_sample_indices_] = True
 labels = db1.labels_
@@ -256,4 +294,9 @@ def createFeatures(img):
     feature[:,1] = c[0]
     return feature
 
+def binarize(img):
+    imgb = np.zeros((np.shape(img)))
+    imgb[img > 160] = 255
+    imgb[img <= 160] = 0
+    return imgb
     
