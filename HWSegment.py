@@ -5,7 +5,8 @@ import numpy as np
 import os
 from Images import Images
 from matplotlib import pyplot as plt
-from sklearn.cluster import DBSCAN
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
 from sklearn import metrics
 
 path1 = '/home/karna/Karna_Work/Handwriting_Project/Handwriting-Segmentation/data/'
@@ -62,50 +63,65 @@ imgcan[imgcan==5]=0
 plt.imshow(imgcan,cmap='gray')
 plt.show()
 sh=np.shape(imgcan)
-imgcutcan=imgcan[0:200,0:sh[1]-200]
+imgcutcan=imgcan[10:300,20:sh[1]-200]
 plt.imshow(imgcutcan,cmap='gray')
 plt.show()
+
+
+a = imgcutcan[0:10,100:150]
+plt.imshow(a,cmap='gray')
+plt.show()
+
 fimgb = createFeatures(imgcutcan)
 
-#fourier transform to remove noise
+#fourier transform to remove noise .. Not Required!!
 
-f = np.fft.fft2(imgcan)
-fshift = np.fft.fftshift(f)
-magnitude_spectrum = 20*np.log(np.abs(fshift))
-plt.subplot(121),plt.imshow(imgcan, cmap = 'gray')
-plt.title('Input Image'), plt.xticks([]), plt.yticks([])
-plt.subplot(122),plt.imshow(magnitude_spectrum, cmap = 'gray')
-plt.title('Magnitude Spectrum'), plt.xticks([]), plt.yticks([])
-plt.show()
+# f = np.fft.fft2(imgcutcan)
+# fshift = np.fft.fftshift(f)
+# magnitude_spectrum = 20*np.log(np.abs(fshift))
+# plt.subplot(121),plt.imshow(imgcutcan, cmap = 'gray')
+# plt.title('Input Image'), plt.xticks([]), plt.yticks([])
+# plt.subplot(122),plt.imshow(magnitude_spectrum, cmap = 'gray')
+# plt.title('Magnitude Spectrum'), plt.xticks([]), plt.yticks([])
+# plt.show()
+# 
+# fg = fshift;
+# 
+# fg[np.abs(fg < 500)]=0;
+# 
+# p=300
+# sh = np.shape(fshift)
+# fshift[0:sh[0]/4+p,:] = 0 
+# fshift[:,0:sh[1]/4+p] = 0
+# fshift[3*sh[0]/4-p:sh[0]-1,:] = 0
+# fshift[:,3*sh[1]/4-p:sh[1]-1] = 0
+# 
+# f_ishift = np.fft.ifftshift(fg)
+# img_back = np.fft.ifft2(f_ishift)
+# img_back = np.abs(img_back)
+# 
+# plt.subplot(131),plt.imshow(rpimgi, cmap = 'gray')
+# plt.title('Input Image'), plt.xticks([]), plt.yticks([])
+# plt.subplot(132),plt.imshow(img_back, cmap = 'gray')
+# plt.title('Image after LPF'), plt.xticks([]), plt.yticks([])
+# plt.subplot(133),plt.imshow(img_back)
+# plt.title('Result in JET'), plt.xticks([]), plt.yticks([])
+# plt.imshow(img_back, cmap = 'gray')
 
-p=300
-sh = np.shape(fshift)
-fshift[0:sh[0]/4+p,:] = 0
-fshift[:,0:sh[1]/4+p] = 0
-fshift[3*sh[0]/4-p:sh[0]-1,:] = 0
-fshift[:,3*sh[1]/4-p:sh[1]-1] = 0
-
-f_ishift = np.fft.ifftshift(fshift)
-img_back = np.fft.ifft2(f_ishift)
-img_back = np.abs(img_back)
-
-plt.subplot(131),plt.imshow(imgcan, cmap = 'gray')
-plt.title('Input Image'), plt.xticks([]), plt.yticks([])
-plt.subplot(132),plt.imshow(img_back, cmap = 'gray')
-plt.title('Image after LPF'), plt.xticks([]), plt.yticks([])
-plt.subplot(133),plt.imshow(img_back)
-plt.title('Result in JET'), plt.xticks([]), plt.yticks([])
-plt.imshow(img_back, cmap = 'gray')
-plt.show()
-
-fimgi = fimgb
-# Compute DBSCAN .. little slow!!
-db1 = DBSCAN(eps=2, min_samples=5).fit(fimgb)
-#core_samples_mask = np.zeros_like(db1.labels_, dtype=bool)
-#core_samples_mask[db1.core_sample_indices_] = True
-labels = db1.labels_
-#print(labels)
-n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+#plt.figure()
+#plt.scatter(fimgb[:,0],fimgb[:,1])
+# plt.show()
+# #Clustering ..
+# fimgi = fimgb
+# pca = PCA(n_components=2).fit(fimgb)
+# # Compute DBSCAN .. little slow!!
+# #db1 = DBSCAN(eps=2, min_samples=5).fit(fimgb)
+# af1 = AffinityPropagation(preference=None).fit(fimgb)
+# #core_samples_mask = np.zeros_like(db1.labels_, dtype=bool)
+# #core_samples_mask[db1.core_sample_indices_] = True
+# labels = db1.labels_
+# #print(labels)
+# n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
 
 #Calculating Maximum and Minimum of each cluster and storing 1 for max and -1 for min value in corresponding index position of maxminarray ...
 
