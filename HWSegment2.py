@@ -11,7 +11,8 @@ from sklearn import metrics
 import lasagne
 import theano
 import theano.tensor as T
-
+theano.config.exception_verbosity='high'
+theano.config.traceback.limit=100
 path1 = '/home/karna/Karna_Work/Handwriting_Project/Handwriting-Segmentation/data/'
 
 img = Images(path1)
@@ -74,50 +75,38 @@ path2 = '/home/karna/Karna_Work/Handwriting_Project/Handwriting-Segmentation/tes
 
 testimg = Images(path2)
 
-
-
 for i in range(0,testimg.cnt-1):
-    We=lasagne.utils.create_param(np.zeros((1,1,5,5)),(1,1,5,5))
-    be=lasagne.utils.create_param(np.zeros((1,)),(1,))
+   # We=lasagne.utils.create_param(np.zeros((1,1,20,20)),(1,1,5,5))
+   # be=lasagne.utils.create_param(np.zeros((1,)),(1,))
     timgi = testimg.getImage(0)
     sh=timgi.shape
     sh2=[1,sh[2],sh[0],sh[1]]
-   # output=lasagne.utils.create_param(np.zeros((1,1,sh[0],sh[1])),(1,1,sh[0],sh[1]))
-    var_in=timgi[None,:,:,:]
-    var_t=np.array([0.8,])
+    var_in = T.tensor4('var_in')
+    var_t = T.dvector('var_t')
     inputlayer= lasagne.layers.InputLayer(sh2,name="Images", input_var=var_in)
     target = lasagne.layers.InputLayer((1,),name="targets",input_var=var_t)
-    cnn1 = lasagne.layers.Conv2DLayer(inputlayer,num_filters=1,filter_size=(20,        20),stride=(1,1),pad='full', nonlinearity=lasagne.nonlinearities.sigmoid, W=We, b=be)
+    cnn1 = lasagne.layers.Conv2DLayer(inputlayer,num_filters=1,filter_size=(20,
+    20),stride=(1,1),nonlinearity=lasagne.nonlinearities.sigmoid,W=lasagne.init.GlorotUniform(), b=lasagne.init.Constant(0.))
     mp2=lasagne.layers.MaxPool2DLayer(cnn1,(2,2),stride=None, pad=(0,0),ignore_border=True)
-    cnn3 = lasagne.layers.Conv2DLayer(mp2,num_filters=1,filter_size=(5,        5),stride=(1,1),pad='same', nonlinearity=lasagne.nonlinearities.sigmoid, W=We, b=be)
+    cnn3 = lasagne.layers.Conv2DLayer(mp2,num_filters=1,filter_size=(5,5),stride=(1,1),nonlinearity=lasagne.nonlinearities.sigmoid,W=lasagne.init.GlorotUniform(), b=lasagne.init.Constant(0.))
     mp4=lasagne.layers.MaxPool2DLayer(cnn3,(2,2),stride=1, pad=(0,0),ignore_border=True)
     outputs = lasagne.layers.get_output(mp4)
     targets = lasagne.layers.get_output(target)
+   # outputs=mp4.get_output_for(cnn3)
+    #targets =
     loss = 0
     loss += lasagne.objectives.binary_crossentropy(outputs,targets).mean()
     #reg_p = lasagne.layers.get_all_params(r_l, regularizable=True)
-   # loss += 0.0005 * lasagne.regularization.apply_penalty(reg_p,lasagne.regularization.l2)
+   #loss += 0.0005 * lasagne.regularization.apply_penalty(reg_p,lasagne.regularization.l2)
+    loss_f = theano.function([var_in, var_t], loss)
     
-    loss_f = theano.function([inputlayer.input_var, target.input_var], loss, updates=updates,            mode=NanGuardMode(nan_is_error=True, inf_is_error=True, big_is_error=True)) params = lasagne.layers.get_all_params(r_l, trainable=True)
+    theano.config.compute_test_value = 'warn'
+   
+    varin= timgi[None,:,:,:]
+    varin = np.transpose(varin, (0,3,1,2))
+    varout=[0.8,]
+    l=loss_f(varin,varout)
     
-    
-    
-def build_cnn(input_var=None):
-    network = lasagne.layers.InputLayer(shape=(None, 3, 20, 20),input_var=input_var)
-    network = lasagne.layers.Conv2DLayer(network, num_filters=1, filter_size=(20, 20),nonlinearity=lasagne.nonlinearities.rectify,
-        W=lasagne.init.GlorotUniform())
-    network = lasagne.layers.MaxPool2DLayer(network, pool_size=(2, 2))
-    network = lasagne.layers.Conv2DLayer(network, num_filters=1, filter_size=(10, 10),                nonlinearity=lasagne.nonlinearities.rectify)
-    network = lasagne.layers.MaxPool2DLayer(network, pool_size=(2, 2))
-    network = lasagne.layers.Conv2DLayer(network, num_filters=1, filter_size=(5, 5),                      nonlinearity=lasagne.nonlinearities.rectify)
-    network = lasagne.layers.MaxPool2DLayer(network, pool_size=(2, 2))
-
-
-
-
-
-
-
 
 def findMaxInCluster(i,image,maxminarray,labels):
       b = np.where(labels==i)
